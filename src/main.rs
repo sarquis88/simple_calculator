@@ -5,11 +5,16 @@ extern crate regex;
 use regex::Regex;
 
 const EXIT_MSG: &str = "exit\n";
-const MAX_EQU_PARTS: usize = 2;
+const ERROR_MSG: &str = "err";
+
+const SUM_CHAR: char = '+';
+const SUB_CHAR: char = '-';
+//const MUL_CHAR: char = '*';
+//const DIV_CHAR: char = '/';
 
 fn main() 
 {
-    println!( "Welcome.\nSupported operations: +, -, *, **, /.");
+    println!( "Welcome.\nSupported operations: +, -.");
 
     loop
     {
@@ -25,7 +30,14 @@ fn main()
 
         if message.len() > 2
         {
-            message = calculate( message );
+            if message.eq( ERROR_MSG )
+            {
+                message = "Bad input".to_string();
+            }
+            else
+            {
+                message = calculate( vectorize( message ) );
+            }
         }
         else
         {
@@ -54,80 +66,82 @@ fn input() -> String
 
 fn parse( input : String ) -> String
 {
-    let reg_clean = Regex::new( r"[a-zA-Z]+|\s" ).unwrap();
+    let reg = Regex::new( r"\s" ).unwrap();
+    let parsed_input = reg.replace_all( &input, "" ).to_string();
 
-    let parsed_input = reg_clean.replace_all( &input, "" ).to_string();
+    let reg = Regex::new( r"\-|\+" ).unwrap();
+    let sign_cantity = reg.find_iter( &input ).count();
 
-    parsed_input
+    let reg = Regex::new( r"[0-9]+" ).unwrap();
+    let number_cantity = reg.find_iter( &input ).count();
+
+    if number_cantity == sign_cantity + 1
+    {
+        return parsed_input;
+    }
+    else
+    {
+        return ERROR_MSG.to_string();
+    }
 }
 
-fn calculate( input : String ) -> String
+fn vectorize( input : String ) -> Vec<String>
 {
-    let mut sign = String::new();
+    let mut equ_parts: Vec<String> = Vec::new();
+    let mut i: usize = 0;
+    let mut first = true;
+    let mut last_pos: usize = 0;
 
-    let reg_sum = Regex::new( r"(.*?)\+(.*?)" ).unwrap();
-    let reg_sub = Regex::new( r"(.*?)\-(.*?)" ).unwrap();
-    let reg_mul = Regex::new( r"(.*?)\*(.*?)" ).unwrap();
-    let reg_pow = Regex::new( r"(.*?)\*\*(.*?)" ).unwrap();
-    let reg_div = Regex::new( r"(.*?)/(.*?)" ).unwrap();
+    for ch in input.chars()
+    {
+        if (ch as i8) < 48 || (ch as i8) > 57
+        {
+            if first
+            {
+                equ_parts.push( input[ 0..i ].to_string() );
+                first = false;
+            }
+            else
+            {
+                equ_parts.push( input[ last_pos+1..i ].to_string() );
+            }
+            equ_parts.push( ch.to_string() );
+            last_pos = i;
+        }
+        i += 1;
+    }
+    equ_parts.push( input[ last_pos+1..input.len() ].to_string() );
 
-    if reg_sum.is_match( &input )
+    equ_parts
+}
+
+fn calculate( input_vector : Vec<String> ) -> String
+{
+    let mut result: i32 = 0;
+    let mut i: usize = 1;
+
+    result = input_vector[ 0 ].parse().unwrap();
+    loop
     {
-        sign = "+".to_string();
-    }
-    else if reg_sub.is_match( &input )
-    {
-        sign = "-".to_string();
-    }
-    else if reg_pow.is_match( &input )
-    {
-        sign = "**".to_string();
-    }
-    else if reg_mul.is_match( &input )
-    {
-        sign = "*".to_string();
-    }
-    else if reg_div.is_match( &input )
-    {
-        sign = "/".to_string();
-    }
-    else
-    {
-        return "NULL".to_string();
+        let number: i32 = input_vector[ i + 1 ].parse().unwrap();
+
+        if input_vector[ i ].eq( &SUM_CHAR.to_string() )
+        {
+            result += number;
+        }
+        else if input_vector[ i ].eq( &SUB_CHAR.to_string() )
+        {
+            result -= number;
+        }
+
+        i += 2;
+
+        if i >= input_vector.len()
+        {
+            break;
+        }
     }
 
-    let vector: Vec<&str> = input.split( &sign ).collect();
+    return result.to_string();
 
-    if vector.len() > MAX_EQU_PARTS
-    {
-        return "Too large".to_string();
-    }
-
-    let first : i32 = vector    [ 0 ].parse().unwrap();
-    let second : i32 = vector   [ 1 ].parse().unwrap();
-
-    if sign.eq( "-" )
-    {
-        return ( first - second ).to_string();
-    }
-    else if sign.eq( "+" )
-    {
-        return ( first + second ).to_string();
-    }
-    else if sign.eq( "*" )
-    {
-        return ( first * second ).to_string();
-    }
-    else if sign.eq( "**" )
-    {
-        return i32::pow( first, second as u32 ).to_string();
-    }
-    else if sign.eq( "/" )
-    {
-        return ( first / second ).to_string();
-    }
-    else
-    {
-        return "NULL".to_string();
-    }
 }
