@@ -9,6 +9,8 @@ const MAX_EQU_PARTS: usize = 2;
 
 fn main() 
 {
+    println!( "Welcome.\nSupported operations: +, -, *, **, /.");
+
     loop
     {
         let mut message = input();
@@ -36,13 +38,18 @@ fn main()
 
 fn input() -> String
 {   
-    let mut input = String::new();
+    loop
+    {
+        let mut input = String::new();
+        print!( ">> ");
+        io::stdout().flush().unwrap();
+        io::stdin().read_line( &mut input ).expect( "error: unable to read user input" );
 
-    print!( ">> ");
-    io::stdout().flush().unwrap();
-    io::stdin().read_line( &mut input ).expect( "error: unable to read user input" );
-
-    input
+        if input.chars().next().unwrap() != '\n'
+        {
+            return input;
+        }
+    }
 }
 
 fn parse( input : String ) -> String
@@ -56,24 +63,40 @@ fn parse( input : String ) -> String
 
 fn calculate( input : String ) -> String
 {
-    let sign : char;
+    let mut sign = String::new();
 
     let reg_sum = Regex::new( r"(.*?)\+(.*?)" ).unwrap();
     let reg_sub = Regex::new( r"(.*?)\-(.*?)" ).unwrap();
+    let reg_mul = Regex::new( r"(.*?)\*(.*?)" ).unwrap();
+    let reg_pow = Regex::new( r"(.*?)\*\*(.*?)" ).unwrap();
+    let reg_div = Regex::new( r"(.*?)/(.*?)" ).unwrap();
+
     if reg_sum.is_match( &input )
     {
-        sign = '+';
+        sign = "+".to_string();
     }
     else if reg_sub.is_match( &input )
     {
-        sign = '-';
+        sign = "-".to_string();
+    }
+    else if reg_pow.is_match( &input )
+    {
+        sign = "**".to_string();
+    }
+    else if reg_mul.is_match( &input )
+    {
+        sign = "*".to_string();
+    }
+    else if reg_div.is_match( &input )
+    {
+        sign = "/".to_string();
     }
     else
     {
         return "NULL".to_string();
     }
 
-    let vector: Vec<&str> = input.split( sign ).collect();
+    let vector: Vec<&str> = input.split( &sign ).collect();
 
     if vector.len() > MAX_EQU_PARTS
     {
@@ -83,13 +106,25 @@ fn calculate( input : String ) -> String
     let first : i32 = vector    [ 0 ].parse().unwrap();
     let second : i32 = vector   [ 1 ].parse().unwrap();
 
-    if sign == '-'
+    if sign.eq( "-" )
     {
         return ( first - second ).to_string();
     }
-    else if sign == '+'
+    else if sign.eq( "+" )
     {
         return ( first + second ).to_string();
+    }
+    else if sign.eq( "*" )
+    {
+        return ( first * second ).to_string();
+    }
+    else if sign.eq( "**" )
+    {
+        return i32::pow( first, second as u32 ).to_string();
+    }
+    else if sign.eq( "/" )
+    {
+        return ( first / second ).to_string();
     }
     else
     {
