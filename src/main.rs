@@ -5,7 +5,9 @@ extern crate regex;
 use regex::Regex;
 
 const EXIT_MSG: &str = "exit\n";
-const ERROR_MSG: &str = "err";
+
+const MAIN_ERROR_MSG: &str = "Something went wrong";
+const PARSE_ERROR_MSG: &str = "Bad syntax";
 
 const SUM_CHAR: char = '+';
 const SUB_CHAR: char = '-';
@@ -26,16 +28,17 @@ fn main()
             break;
         }
 
-        message = parse( message );
+        message = parse( message ).unwrap();
 
         if message.len() > 2
         {
-            if message.eq( ERROR_MSG )
+            if message.eq( MAIN_ERROR_MSG )
             {
                 message = "Bad input".to_string();
             }
             else
             {
+                //println!( "{:?}", vectorize( message ) );
                 message = calculate( vectorize( message ) );
             }
         }
@@ -64,25 +67,28 @@ fn input() -> String
     }
 }
 
-fn parse( input : String ) -> String
+fn parse( input : String ) -> std::result::Result<String, String>
 {
     let reg = Regex::new( r"\s" ).unwrap();
     let parsed_input = reg.replace_all( &input, "" ).to_string();
+    Ok( parsed_input )
 
+    /*
     let reg = Regex::new( r"\-|\+" ).unwrap();
-    let sign_cantity = reg.find_iter( &input ).count();
+    let sign_cantity = reg.find_iter( &parsed_input ).count();
 
     let reg = Regex::new( r"[0-9]+" ).unwrap();
-    let number_cantity = reg.find_iter( &input ).count();
-
+    let number_cantity = reg.find_iter( &parsed_input ).count();
+    
     if number_cantity == sign_cantity + 1
     {
-        return parsed_input;
+        Ok( parsed_input )
     }
     else
     {
-        return ERROR_MSG.to_string();
+        Err( PARSE_ERROR_MSG.to_string() )
     }
+    */
 }
 
 fn vectorize( input : String ) -> Vec<String>
@@ -94,7 +100,7 @@ fn vectorize( input : String ) -> Vec<String>
 
     for ch in input.chars()
     {
-        if (ch as i8) < 48 || (ch as i8) > 57
+        if ch == '+' || ch == '-'
         {
             if first
             {
@@ -119,11 +125,30 @@ fn calculate( input_vector : Vec<String> ) -> String
 {
     let mut result: i32 = 0;
     let mut i: usize = 1;
+    let reg = Regex::new( r"\*" ).unwrap();
 
-    result = input_vector[ 0 ].parse().unwrap();
+    if reg.is_match( &input_vector[ 0 ] )
+    {
+        let number_vec: Vec<&str> = input_vector[ 0 ].split("*").collect();
+        result = number_vec[0].parse::<i32>().unwrap() * number_vec[1].parse::<i32>().unwrap();
+    }
+    else
+    {
+        result = input_vector[ 0 ].parse().unwrap();
+    }
+
     loop
     {
-        let number: i32 = input_vector[ i + 1 ].parse().unwrap();
+        let number: i32;
+        if reg.is_match( &input_vector[ i + 1 ] )
+        {
+            let number_vec: Vec<&str> = input_vector[ i + 1].split("*").collect();
+            number = number_vec[0].parse::<i32>().unwrap() * number_vec[1].parse::<i32>().unwrap();
+        }
+        else
+        {
+            number = input_vector[ i + 1 ].parse().unwrap();
+        }
 
         if input_vector[ i ].eq( &SUM_CHAR.to_string() )
         {

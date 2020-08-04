@@ -1,1 +1,1 @@
-./target/debug/rust_calculator
+./target/debug/simple_calculator
