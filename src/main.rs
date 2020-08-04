@@ -1,18 +1,29 @@
-use std::io;
-use std::io::*;
-
 /* Crates */
 extern crate regex;
+use std::io;
+use std::io::*;
 use regex::Regex;
 
-/* Consts */
+/* Consts messages */
 const EXIT_MSG: &str = "exit\n";
 const MAIN_ERROR_MSG: &str = "Something went wrong";
 const PARSE_ERROR_MSG: &str = "Bad syntax";
+
+/* Consts codes */
 const SUM_CHAR: char = '+';
 const SUB_CHAR: char = '-';
 const MUL_CHAR: char = '*';
 const DIV_CHAR: char = '/';
+const POW_STR: &str = "**";
+
+/* Enums */
+#[derive(PartialEq, Eq)]
+enum ReturnCodes
+{
+    Okey = 0,
+    Error,
+    Exit
+}
 
 /*
     Main function.
@@ -25,9 +36,14 @@ fn main()
 
     loop
     {
-        let mut message = input();
+        let mut message: String;
+        let mut code: ReturnCodes;
 
-        if message.eq( EXIT_MSG )
+        message = String::new();
+        
+        code = input( &mut message );
+
+        if code == ReturnCodes::Exit
         {
             println!( "Bye" );
             break;
@@ -58,22 +74,28 @@ fn main()
 
 /*
     User input.
-    @return String representing the stdin.
+    @param buffer for store the input.
 */
-fn input() -> String
+fn input( buffer: &mut String ) -> ReturnCodes
 {   
     loop
     {
-        let mut input = String::new();
         print!( ">> ");
         io::stdout().flush().unwrap();
-        io::stdin().read_line( &mut input ).expect( "error: unable to read user input" );
+        io::stdin().read_line( buffer ).unwrap();
 
-        if input.chars().next().unwrap() != '\n'
+        if buffer.chars().next().unwrap() != '\n'
         {
-            return input;
+            break;
         }
     }
+
+    if buffer.to_string().eq( EXIT_MSG )
+    {
+        return ReturnCodes::Exit;
+    }
+
+    return ReturnCodes::Okey;
 }
 
 /*
@@ -206,7 +228,7 @@ fn calculate( expression_vector : Vec<String> ) -> String
 }
 
 /*
-    Resolve an expression from an expression vector. Supports '*' and '/' 
+    Resolve an expression from an expression vector. Supports '*', '**' and '/' 
     signs.
     @param expression the expression to solve.
     @return String representing the expression solved.
@@ -215,7 +237,11 @@ fn solve_expression( expression : &str ) -> String
 {
     let expression_str : String;
     
-    if Regex::new( r"\*" ).unwrap().is_match( expression )
+    if Regex::new( r"\*\*" ).unwrap().is_match( expression )
+    {
+        expression_str = solve_pow( expression ).unwrap();
+    }
+    else if Regex::new( r"\*" ).unwrap().is_match( expression )
     {
         expression_str = solve_product( expression );
     }
@@ -273,4 +299,33 @@ fn solve_division( expression : &str ) -> String
     }
     
     return product.to_string();
+}
+
+/*
+    Resolve an expression from an expression vector. Supports only '**' signs.
+    @param expression the expression to solve.
+    @return Result enum. In case of Ok, returnes the result of the operation.
+    Otherwise, returnes an error message.
+*/
+fn solve_pow( expression : &str ) -> std::result::Result< String, String >
+{
+    let partitions: Vec< &str >;
+    let base: i32;
+    let exp: u32;
+    
+    partitions = expression.split( POW_STR ).collect();
+    
+    if  partitions.len() != 2       ||
+        partitions[ 0 ].is_empty()  || 
+        partitions[ 1 ].is_empty()
+    {
+        Err( PARSE_ERROR_MSG.to_string() )
+    }
+    else
+    {
+        base = partitions[ 0 ].to_string().parse().unwrap();
+        exp = partitions[ 1 ].to_string().parse().unwrap();
+
+        Ok( base.pow( exp ).to_string() )
+    }
 }
