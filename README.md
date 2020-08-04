@@ -1,2 +1,3 @@
 # simple_calculator
-Simple calculator 
+#### Simple calculator made with Rust.
+#### Supports ```+```, ```-```, ```*``` and ```/``` operations.
