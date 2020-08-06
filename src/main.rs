@@ -1,10 +1,7 @@
 /* Lib */
-use simple_calculator::*;
 use std::env;
 
-/*
-    Main function.
-*/
+/// Main function.
 fn main() 
 {
     let args: Vec<String> = env::args().collect();

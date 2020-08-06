@@ -32,11 +32,9 @@ pub enum ReturnCodes
     Exit
 }
 
-/*
-    User input.
-    @param  buffer for store the input.
-    @return ReturnCode depending the succes of the operation.
-*/
+/// User input. \
+/// @param  buffer for store the input. \
+/// @return ReturnCode depending the succes of the operation.
 pub fn input( buffer: &mut String ) -> ReturnCodes
 {   
     loop
@@ -59,13 +57,11 @@ pub fn input( buffer: &mut String ) -> ReturnCodes
     return ReturnCodes::Okey;
 }
 
-/*
-    Prepare the user input to be passed to the calculator. Clean spaces and
-    does a syntax check.
-    @param  input user input in String format.
-    @param  String buffer for storing the parsed String.
-    @return ReturnCode depending the succes of the operation.
-*/
+/// Prepare the user input to be passed to the calculator. Clean spaces and 
+/// does a syntax check. \
+/// @param  input user input in String format. \
+/// @param  String buffer for storing the parsed String. \
+/// @return ReturnCode depending the succes of the operation.
 pub fn parse( input: String, buffer: &mut String ) -> ReturnCodes
 {
     let reg = Regex::new( r"[a-zA-Z]" ).unwrap();
@@ -80,7 +76,14 @@ pub fn parse( input: String, buffer: &mut String ) -> ReturnCodes
 
         if buffer.len() > 2
         {
-            return ReturnCodes::Okey;
+            if deep_check( buffer.to_string() )
+            {
+                ReturnCodes::Okey
+            }
+            else
+            {
+                ReturnCodes::SyntaxErr
+            }
         }
         else
         {
@@ -89,13 +92,36 @@ pub fn parse( input: String, buffer: &mut String ) -> ReturnCodes
     }
 }
 
-/*
-    Split the input expression (parsed) into a vector of expressions. Each
-    expression is separated from the other by '+' or '-'.
-    @param  expression_str input String parsed.
-    @param  buffer_vector buffer for storing the vectorized expression.
-    @return ReturnCode depending the succes of the operation.
-*/
+/// Char-to-char check. Ensures that the String has only numbers and the
+/// operations signs. \
+/// @param  input parsed input to check. \
+/// @return true for a correct syntax 
+///         false otherwise
+fn deep_check( input: String ) -> bool
+{
+    let input_vector: Vec<char>;
+    
+    input_vector = input.chars().collect();
+
+    for ch in input_vector
+    {
+        if (ch as u8) < 48 || (ch as u8) > 57
+        {
+            if ch != '+' && ch != '-' && ch != '/' && ch != '*'
+            {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+/// Split the input expression (parsed) into a vector of expressions. Each
+/// expression is separated from the other by '+' or '-'. \
+/// @param  expression_str input String parsed. \
+/// @param  buffer_vector buffer for storing the vectorized expression. \
+/// @return ReturnCode depending the succes of the operation.
 pub fn vectorize( expression_str : &mut String, buffer_vector: &mut Vec< String > ) -> ReturnCodes
 {
     let mut i: usize;
@@ -139,12 +165,10 @@ pub fn vectorize( expression_str : &mut String, buffer_vector: &mut Vec< String 
     ReturnCodes::Okey
 }
 
-/*
-    Does the calculation process.
-    @param  expression_vector String vector with all the expressions.
-    @param  buffer for storing the result.
-    @return ReturnCode depending the succes of the operation.
-*/
+/// Does the calculation process. \
+/// @param  expression_vector String vector with all the expressions. \
+/// @param  buffer for storing the result. \
+/// @return ReturnCode depending the succes of the operation.
 pub fn calculate( expression_vector: Vec<String>, buffer: &mut String) -> ReturnCodes
 {
     let mut i: usize;
@@ -214,13 +238,11 @@ pub fn calculate( expression_vector: Vec<String>, buffer: &mut String) -> Return
     }
 }
 
-/*
-    Resolve an expression from an expression vector. Supports '*', '**' and '/' 
-    signs.
-    @param  expression the expression to solve.
-    @param  buffer for store the expression solved.
-    @return ReturnCode depending the succes of the operation.
-*/
+/// Resolve an expression from an expression vector. Supports '*', '**' and '/' 
+/// signs. \
+/// @param  expression the expression to solve. \
+/// @param  buffer for store the expression solved. \
+/// @return ReturnCode depending the succes of the operation. 
 fn solve_expression( expression: &str, buffer: &mut String ) -> ReturnCodes
 {
     
@@ -243,13 +265,11 @@ fn solve_expression( expression: &str, buffer: &mut String ) -> ReturnCodes
     }
 }
 
-/*
-    Resolve an expression from an expression vector. Supports only '*' 
-    sign.
-    @param  expression the expression to solve.
-    @param  buffer for store the expression solved.
-    @return ReturnCode depending the succes of the operation.
-*/
+/// Resolve an expression from an expression vector. Supports only '*' 
+/// sign. \
+/// @param  expression the expression to solve. \
+/// @param  buffer for store the expression solved. \
+/// @return ReturnCode depending the succes of the operation.
 fn solve_product( expression: &str, buffer: &mut String ) -> ReturnCodes
 {
     let partitions: Vec< &str >;
@@ -268,13 +288,11 @@ fn solve_product( expression: &str, buffer: &mut String ) -> ReturnCodes
     return ReturnCodes::Okey;
 }
 
-/*
-    Resolve an expression from an expression vector. Supports only '/' 
-    sign.
-    @param  expression the expression to solve.
-    @param  buffer for store the expression solved.
-    @return ReturnCode depending the succes of the operation.
-*/
+/// Resolve an expression from an expression vector. Supports only '/' 
+/// sign. \
+/// @param  expression the expression to solve. \
+/// @param  buffer for store the expression solved. \
+/// @return ReturnCode depending the succes of the operation.
 fn solve_division( expression: &str, buffer: &mut String ) -> ReturnCodes
 {
     let partitions: Vec< &str >;
@@ -293,12 +311,10 @@ fn solve_division( expression: &str, buffer: &mut String ) -> ReturnCodes
     return ReturnCodes::Okey;
 }
 
-/*
-    Resolve an expression from an expression vector. Supports only '**' signs.
-    @param  expression the expression to solve.
-    @param  buffer for store the expression solved.
-    @return ReturnCode depending the succes of the operation.
-*/
+/// Resolve an expression from an expression vector. Supports only '**' signs. \
+/// @param  expression the expression to solve. \
+/// @param  buffer for store the expression solved. \
+/// @return ReturnCode depending the succes of the operation.
 fn solve_pow( expression: &str, buffer: &mut String ) -> ReturnCodes
 {
     let partitions: Vec< &str >;
