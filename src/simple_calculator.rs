@@ -6,9 +6,14 @@ use regex::Regex;
 
 /* Consts messages */
 pub const EXIT_INPUT: &str = "exit\n";
+pub const HELP_ARG: &str = "--help";
+pub const H_ARG: &str = "-h";
 pub const EXIT_MSG: &str = "Bye";
 pub const MAIN_ERROR_MSG: &str = "Something went wrong";
 pub const SYNTAX_ERROR_MSG: &str = "Bad syntax";
+pub const HELP_ARG_MSG: &str = "Supported operations: '+', '-', '*', '/', '**'.\nLimitations: cannot use two (differents) of '*', '/' or '**' between '+' or '-' signs.";
+pub const UNKNOWN_ARG_MSG: &str = "Unrecognized option";  /* consider adding ": <unknown_arg>" */
+pub const ARGS_LIST_MSG: &str = "Recognized options:\n  -h  --help  prints usage and exit";
 
 /* Consts codes */
 pub const SUM_CHAR: char = '+';

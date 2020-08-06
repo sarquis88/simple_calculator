@@ -1,1 +1,1 @@
-./target/debug/simple_calculator
+./target/debug/simple_calculator $1

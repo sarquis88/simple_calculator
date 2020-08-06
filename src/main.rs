@@ -1,14 +1,27 @@
 /* Lib */
 use simple_calculator::*;
+use std::env;
 
 /*
     Main function.
 */
 fn main() 
 {
-    println!( "Welcome");
-    println!( "Supported operations: +, -, *, / and **.");
-    println!( "Limitations: '*' and '/' cannot be in the same expression");
+    let args: Vec<String> = env::args().collect();
+    if args.len() > 1
+    {
+        if  args[ 1 ].eq( simple_calculator::HELP_ARG ) |
+            args[ 1 ].eq( simple_calculator::H_ARG )
+        {
+            println!( "{}", simple_calculator::HELP_ARG_MSG );
+        }
+        else
+        {
+            println!( "{}: {}", simple_calculator::UNKNOWN_ARG_MSG, args[ 1 ] );
+            println!( "{}", simple_calculator::ARGS_LIST_MSG );
+        }
+        return;
+    }
 
     'outer_loop: loop
     {
