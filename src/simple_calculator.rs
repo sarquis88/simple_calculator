@@ -1,5 +1,4 @@
 /// Crates imported.
-extern crate regex;
 use regex::Regex;
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
@@ -265,7 +264,7 @@ pub fn calculate( expression_vector: Vec<String>, buffer: &mut String) -> Return
             }
         }
 
-        *buffer = result.to_string();
+        *buffer = "= ".to_string() + &result.to_string();
         return ReturnCodes::Okey;
     }
 }
