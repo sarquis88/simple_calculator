@@ -1,10 +1,14 @@
 /// Lib imported.
 use std::env;
+extern crate ctrlc;
+use std::process;
 
 /// Main function.
 fn main() 
 {
-    let args: Vec<String> = env::args().collect();
+    let args: Vec<String>;
+    
+    args = env::args().collect();
     if args.len() > 1
     {
         if  args[ 1 ].eq( simple_calculator::HELP_ARG ) |
@@ -20,6 +24,13 @@ fn main()
         return;
     }
 
+    ctrlc::set_handler( move || {
+        println!( "" );
+        exit_routine();
+        process::exit( 0 );
+    })
+    .unwrap();
+
     'outer_loop: loop
     {
         let mut buffer: String;
@@ -33,7 +44,7 @@ fn main()
             code = simple_calculator::input( &mut buffer );
             if code == simple_calculator::ReturnCodes::Exit
             {
-                println!( "{}", simple_calculator::EXIT_MSG.to_string() );
+                exit_routine();
                 break 'outer_loop;
             }
 
@@ -64,4 +75,9 @@ fn main()
             println!( "{}", &buffer );
         }
     }
+}
+
+fn exit_routine()
+{
+    println!( "{}", simple_calculator::EXIT_MSG.to_string() );
 }

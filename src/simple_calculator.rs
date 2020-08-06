@@ -1,11 +1,11 @@
-/* Crates */
+/// Crates imported.
 extern crate regex;
-use std::io;
-use std::io::*;
 use regex::Regex;
+use rustyline::error::ReadlineError;
+use rustyline::Editor;
 
-/* Consts messages */
-pub const EXIT_INPUT: &str = "exit\n";
+/// Consts messages.
+pub const EXIT_INPUT: &str = "exit";
 pub const HELP_ARG: &str = "--help";
 pub const H_ARG: &str = "-h";
 pub const EXIT_MSG: &str = "Bye";
@@ -15,12 +15,15 @@ pub const HELP_ARG_MSG: &str = "Supported operations: '+', '-', '*', '/', '**'.\
 pub const UNKNOWN_ARG_MSG: &str = "Unrecognized option";  /* consider adding ": <unknown_arg>" */
 pub const ARGS_LIST_MSG: &str = "Recognized options:\n  -h  --help  prints usage and exit";
 
-/* Consts codes */
+/// Consts codes
 pub const SUM_CHAR: char = '+';
 pub const SUB_CHAR: char = '-';
 pub const MUL_CHAR: char = '*';
 pub const DIV_CHAR: char = '/';
 pub const POW_STR: &str = "**";
+
+/// Resources
+pub const HISTORY_FILE_PATH: &str = "./history.txt";
 
 /// Enums for functions returnings
 #[derive(PartialEq, Eq)]
@@ -36,25 +39,54 @@ pub enum ReturnCodes
 /// @param  buffer for store the input. \
 /// @return ReturnCode depending the succes of the operation.
 pub fn input( buffer: &mut String ) -> ReturnCodes
-{   
-    loop
-    {
-        print!( ">> ");
-        io::stdout().flush().unwrap();
-        io::stdin().read_line( buffer ).unwrap();
+{
+    let mut rl = Editor::<()>::new();
+    let code: ReturnCodes;
 
-        if buffer.chars().next().unwrap() != '\n'
-        {
-            break;
+    if rl.load_history( HISTORY_FILE_PATH ).is_err() {
+        println!("No previous history.");
+    }
+
+    loop {
+        let readline = rl.readline(">> ");
+        match readline {
+            Ok(line) => {
+                rl.add_history_entry( line.as_str() );
+
+                if line.eq( EXIT_INPUT )
+                {
+                    code = ReturnCodes::Exit;
+                    break;                    
+                }
+                else if line.is_empty()
+                {
+                    continue;       
+                }
+                else
+                {
+                    *buffer = line;
+                    code = ReturnCodes::Okey;
+                    break;
+                }
+            },
+            Err(ReadlineError::Interrupted) => {
+                code = ReturnCodes::Exit;
+                break;
+            },
+            Err(ReadlineError::Eof) => {
+                code = ReturnCodes::SyntaxErr;
+                break;
+            },
+            Err(err) => {
+                code = ReturnCodes::MainErr;
+                println!("Error: {:?}", err);
+                break;
+            }
         }
     }
+    rl.save_history( HISTORY_FILE_PATH ).unwrap();
 
-    if buffer.to_string().eq( EXIT_INPUT )
-    {
-        return ReturnCodes::Exit;
-    }
-
-    return ReturnCodes::Okey;
+    code
 }
 
 /// Prepare the user input to be passed to the calculator. Clean spaces and 
