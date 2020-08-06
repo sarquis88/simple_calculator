@@ -22,7 +22,7 @@ pub const MUL_CHAR: char = '*';
 pub const DIV_CHAR: char = '/';
 pub const POW_STR: &str = "**";
 
-/* Enums */
+/// Enums for functions returnings
 #[derive(PartialEq, Eq)]
 pub enum ReturnCodes
 {

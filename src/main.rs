@@ -1,4 +1,4 @@
-/* Lib */
+/// Lib imported.
 use std::env;
 
 /// Main function.
