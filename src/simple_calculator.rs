@@ -138,7 +138,7 @@ fn deep_check( input: String ) -> bool
     {
         if (ch as u8) < 48 || (ch as u8) > 57
         {
-            if ch != '+' && ch != '-' && ch != '/' && ch != '*'
+            if ch != '+' && ch != '-' && ch != '/' && ch != '*' && ch != '.'
             {
                 return false;
             }
@@ -221,7 +221,7 @@ pub fn calculate( expression_vector: Vec<String>, buffer: &mut String) -> Return
     }
     else
     {
-        let mut result: i32;
+        let mut result: f32;
         let mut solutions_vector: Vec< String >;
 
         solutions_vector = Vec::new();
@@ -243,7 +243,7 @@ pub fn calculate( expression_vector: Vec<String>, buffer: &mut String) -> Return
     
         loop
         {
-            let number: i32;
+            let number: f32;
     
             number = solutions_vector[ i + 1 ].parse().unwrap();
     
@@ -304,14 +304,14 @@ fn solve_expression( expression: &str, buffer: &mut String ) -> ReturnCodes
 fn solve_product( expression: &str, buffer: &mut String ) -> ReturnCodes
 {
     let partitions: Vec< &str >;
-    let mut product;
+    let mut product: f32;
     
     partitions = expression.split( MUL_CHAR ).collect();
-    product = 1;
+    product = 1.0;
 
     for i in 0..partitions.len()
     {
-        product = product * partitions[ i ].to_string().parse::<i32>().unwrap();
+        product = product * partitions[ i ].to_string().parse::<f32>().unwrap();
     }
     
     *buffer = product.to_string();
@@ -327,17 +327,17 @@ fn solve_product( expression: &str, buffer: &mut String ) -> ReturnCodes
 fn solve_division( expression: &str, buffer: &mut String ) -> ReturnCodes
 {
     let partitions: Vec< &str >;
-    let mut product;
+    let mut parcial: f32;
     
     partitions = expression.split( DIV_CHAR ).collect();
-    product = partitions[ 0 ].to_string().parse::<i32>().unwrap();
+    parcial = partitions[ 0 ].to_string().parse().unwrap();
 
     for i in 1..partitions.len()
     {
-        product = product / partitions[ i ].to_string().parse::<i32>().unwrap();
+        parcial = parcial / partitions[ i ].to_string().parse::<f32>().unwrap();
     }
     
-    *buffer = product.to_string();
+    *buffer = parcial.to_string();
 
     return ReturnCodes::Okey;
 }
